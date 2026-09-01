@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스핑크스의 금고</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(212, 175, 55, 0.14), transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(31, 111, 120, 0.18), transparent 50%),
+      linear-gradient(170deg, #191006, #221509 40%, #140d05);
+    color: #e8d9b0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .container { width: 100%; max-width: 540px; }
+
+  header {
+    text-align: center;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+    position: relative;
+  }
+  header .vault-ornament {
+    font-size: 1.9rem;
+    letter-spacing: 8px;
+    color: #d4af37;
+    text-shadow: 0 0 18px rgba(212, 175, 55, 0.5);
+  }
+  header h1 {
+    font-size: 1.7rem;
+    color: #f0c75e;
+    margin-top: 4px;
+    letter-spacing: 4px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  }
+  header .desc {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #b7a477;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: linear-gradient(180deg, rgba(60, 44, 18, 0.5), rgba(28, 19, 8, 0.65));
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(240, 199, 94, 0.12);
+  }
+
+  .stat-grid { display: flex; gap: 10px; }
+  .stat {
+    flex: 1;
+    background: rgba(15, 10, 4, 0.55);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat .slabel { font-size: 0.75rem; color: #9c8a5f; }
+  .stat .svalue { font-size: 1.05rem; font-weight: 700; color: #f0c75e; margin-top: 4px; }
+
+  .run-btn {
+    width: 100%;
+    padding: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(180deg, #e8c25c, #b8912e);
+    color: #1a1206;
+    transition: filter 0.1s ease, transform 0.1s ease;
+  }
+  .run-btn:hover { filter: brightness(1.1); }
+  .run-btn:active { transform: scale(0.98); }
+
+  .hidden { display: none !important; }
+
+  /* 통계 표 */
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .stats-table th, .stats-table td {
+    padding: 7px 8px;
+    text-align: right;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+    white-space: nowrap;
+  }
+  .stats-table th { color: #9c8a5f; font-weight: 600; font-size: 0.75rem; }
+  .stats-table td:first-child, .stats-table th:first-child { text-align: center; }
+  .stats-table td:nth-child(2), .stats-table th:nth-child(2) { text-align: left; }
+  .stats-table tr:last-child td { border-bottom: none; }
+  .stats-table tr.total-row td {
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    color: #f0c75e;
+    font-weight: 700;
+  }
+  .stats-table .mono { font-variant-numeric: tabular-nums; }
+.stats-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .stats-head h3 { font-size: 1rem; color: #b7a477; }
+  .stats-head .note { font-size: 0.75rem; color: #7a6a44; }
+
+  .stats-table tr.highlight-row td {
+    background: rgba(212, 175, 55, 0.16);
+    animation: rowFlash 0.6s ease;
+  }
+  .stats-table tr.highlight-row td:first-child { color: #f0c75e; font-weight: 700; }
+  @keyframes rowFlash {
+    0%   { background: rgba(212, 175, 55, 0.5); transform: scale(1.02); }
+    100% { background: rgba(212, 175, 55, 0.16); transform: scale(1); }
+  }
+
+  .guess-section { text-align: center; }
+  .guess-section .mode-tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #e8c25c;
+    letter-spacing: 2px;
+  }
+  .prompt { font-size: 0.95rem; color: #b7a477; margin-bottom: 6px; }
+
+  .prob-strip { display: flex; gap: 12px; margin: 14px 0 6px; }
+  .prob-item {
+    flex: 1;
+    background: rgba(15, 10, 4, 0.55);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 14px;
+    padding: 10px 6px;
+    text-align: center;
+  }
+  .prob-item .plabel { font-size: 0.72rem; color: #9c8a5f; display: block; }
+  .prob-item .pvalue {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #38bdf8;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .prob-item.cum { background: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.35); }
+  .prob-item.cum .pvalue { color: #f0c75e; }
+  .prob-item .pvalue.flash { animation: probFlash 0.5s ease; }
+  @keyframes probFlash {
+    0%   { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+
+  .reward-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(212, 175, 55, 0.1);
+    color: #e8c25c;
+    transition: filter 0.1s ease;
+  }
+  .reward-btn:hover { filter: brightness(1.15); }
+
+  .reward-panel {
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(15, 10, 4, 0.55);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    animation: panelOpen 0.25s ease;
+  }
+  @keyframes panelOpen {
+    0%   { opacity: 0; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .reward-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .reward-head .reward-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f0c75e;
+  }
+  .reward-head .toggle-btn { padding: 5px 12px; font-size: 0.78rem; font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; cursor: pointer;
+    background: transparent; color: #e8c25c; transition: background 0.15s ease; }
+  .reward-head .toggle-btn:hover { background: rgba(212, 175, 55, 0.15); }
+  .reward-head-btns { display: flex; gap: 6px; }
+  .close-btn {
+    border: none !important;
+    background: linear-gradient(180deg, #7c2d2d, #5a1f1f) !important;
+    color: #ffd9d9 !important;
+    font-weight: 800;
+    padding: 6px 14px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+  }
+  .close-btn:hover {
+    background: linear-gradient(180deg, #933636, #6b2626) !important;
+    filter: brightness(1.15);
+  }
+  .reward-table-wrap { max-height: 240px; overflow-y: auto; }
+  .reward-table { width: 100%; }
+  .reward-table th, .reward-table td,
+  .reward-table th:first-child, .reward-table td:first-child,
+  .reward-table th:nth-child(2), .reward-table td:nth-child(2),
+  .reward-table th:nth-child(3), .reward-table td:nth-child(3),
+  .reward-table th:nth-child(4), .reward-table td:nth-child(4) {
+    font-size: 0.72rem;
+    padding: 5px 4px;
+    text-align: center !important;
+    white-space: nowrap;
+  }
+  .reward-table thead th {
+    background: rgba(212, 175, 55, 0.1);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  }
+  .reward-table thead th.active-col {
+    background: rgba(212, 175, 55, 0.28);
+    color: #fff3c4;
+    font-weight: 700;
+    animation: colFlash 0.6s ease;
+  }
+  .reward-table tbody td.active-col {
+    background: rgba(212, 175, 55, 0.14);
+    color: #f0c75e;
+  }
+  @keyframes colFlash {
+    0%   { background: rgba(212, 175, 55, 0.55); }
+    100% { background: rgba(212, 175, 55, 0.28); }
+  }
+
+  .guess {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #f0c75e;
+    line-height: 1.2;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    text-shadow: 0 0 22px rgba(212, 175, 55, 0.45);
+  }
+  .guess.pop { animation: pop 0.35s ease; }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.12); color: #fff7dd; }
+    100% { transform: scale(1); }
+  }
+  .guess .dcol { text-align: center; line-height: 1.1; }
+  .guess .dcol .arr-box {
+    height: 1.2em;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.2em;
+  }
+  .guess .dcol .arr { font-variant-numeric: tabular-nums; }
+  .guess .dcol .arr.up { color: #f87171; }
+  .guess .dcol .arr.down { color: #60a5fa; }
+  .guess .dcol .dnum { line-height: 1.1; }
+  .guess-hint { font-size: 0.9rem; color: #b7a477; margin-top: 4px; }
+
+  .info { display: flex; justify-content: space-between; margin-top: 20px; gap: 8px; }
+  .info .col { flex: 1; text-align: center; }
+  .info .label { font-size: 0.75rem; color: #9c8a5f; }
+  .info .value { font-size: 1.05rem; font-weight: 700; color: #e8d9b0; margin-top: 4px; }
+
+  .rangebar { margin-top: 16px; }
+  .bar {
+    position: relative;
+    height: 12px;
+    background: rgba(15, 10, 4, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar .cur {
+    position: absolute; top: 0; height: 100%;
+    background: linear-gradient(90deg, #d4af37, #f0c75e);
+    border-radius: 999px; transition: left 0.25s ease, width 0.25s ease;
+  }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: #7a6a44; margin-top: 4px; }
+
+  .error {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(248, 113, 113, 0.14);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    border-radius: 10px;
+    color: #fca5a5;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .buttons button {
+    padding: 17px; font-size: 1.25rem; font-weight: 700; border: none; border-radius: 13px;
+    cursor: pointer; color: #1a1206;
+    transition: transform 0.1s ease, filter 0.1s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+  .buttons button:active { transform: scale(0.97); }
+  .buttons button:hover { filter: brightness(1.08); }
+  .buttons button:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.5); }
+  #btnBigger { background: linear-gradient(180deg, #7fd4a0, #3f9e6b); }
+  #btnAnswer { background: linear-gradient(180deg, #f0c75e, #c19a2c); }
+  #btnSmaller { background: linear-gradient(180deg, #7db8e8, #3f7fc2); }
+
+  .history h3 { font-size: 1rem; color: #b7a477; margin-bottom: 10px; }
+  .history ul { list-style: none; max-height: 200px; overflow-y: auto; }
+  .history li { display: flex; justify-content: space-between; padding: 6px 10px; font-size: 0.95rem; border-radius: 8px; }
+  .history li:nth-child(odd) { background: rgba(212, 175, 55, 0.06); }
+  .history .no { color: #7a6a44; margin-right: 10px; }
+  .res-big { color: #7fd4a0; }
+  .res-small { color: #7db8e8; }
+  .res-ok { color: #f0c75e; }
+
+  .result .emoji { text-align: center; font-size: 3.2rem; }
+  .result h2 { text-align: center; margin: 8px 0 18px; color: #f0c75e; letter-spacing: 3px; }
+  .result .row { display: flex; justify-content: space-between; padding: 10px 4px; border-bottom: 1px solid rgba(212, 175, 55, 0.12); }
+  .result .row .k { color: #9c8a5f; }
+  .result .row .v { font-weight: 700; font-size: 1.1rem; color: #fff; }
+  .result .rating { text-align: center; font-size: 1.15rem; font-weight: 700; color: #f0c75e; margin-top: 18px; }
+
+  .restart-btn {
+    display: block; width: 100%; padding: 18px; margin-top: 20px; font-size: 1.3rem; font-weight: 700;
+    border: none; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(180deg, #e8c25c, #b8912e); color: #1a1206;
+    transition: transform 0.1s ease, filter 0.1s ease;
+  }
+  .restart-btn:active { transform: scale(0.97); }
+  .restart-btn:hover { filter: brightness(1.1); }
+
+  /* 전체 보상 모달 */
+  .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay {
+    position: absolute; inset: 0; background: rgba(10, 6, 2, 0.82);
+    backdrop-filter: blur(4px);
+  }
+  .modal-content {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 620px;
+    display: flex; flex-direction: column;
+    background: linear-gradient(180deg, rgba(60, 44, 18, 0.95), rgba(28, 19, 8, 0.98));
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.7);
+    animation: panelOpen 0.25s ease;
+    max-height: 94vh;
+    overflow: visible;
+  }
+  .modal-content .reward-table-wrap {
+    max-height: none;
+    overflow-y: visible;
+  }
+  .modal-content .reward-table th,
+  .modal-content .reward-table td,
+  .modal-content .reward-table th:first-child, .modal-content .reward-table td:first-child,
+  .modal-content .reward-table th:nth-child(2), .modal-content .reward-table td:nth-child(2),
+  .modal-content .reward-table th:nth-child(3), .modal-content .reward-table td:nth-child(3),
+  .modal-content .reward-table th:nth-child(4), .modal-content .reward-table td:nth-child(4) {
+    font-size: 0.6rem;
+    padding: 2px 3px;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-align: center !important;
+  }
+  .modal-head {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .modal-title { font-size: 1.1rem; font-weight: 800; color: #f0c75e; letter-spacing: 2px; }
+  .modal .close-btn { font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header id="mainHeader">
+    <div class="vault-ornament">❖ ✦ ❖</div>
+    <h1>🔐 스핑크스의 금고</h1>
+    <p class="desc">스핑크스가 정한 숫자를 맞혀 금고를 여세요.<br>이분 탐색으로 최대 14회 안에 찾아드립니다.</p>
+  </header>
+
+  <!-- 게임 화면 -->
+  <div id="gameScreen" class="hidden">
+    <div class="card">
+      <div class="guess-section">
+        <span class="mode-tag">✦ 이분 탐색 ✦</span>
+        <p class="prompt">스핑크스가 생각한 숫자는...</p>
+
+        <div class="prob-strip">
+          <div class="prob-item">
+            <span class="plabel">이번 회차 성공 확률</span>
+            <span id="probNow" class="pvalue">-</span>
+          </div>
+          <div class="prob-item cum">
+            <span class="plabel">누적 기대값</span>
+            <span id="probCum" class="pvalue">-</span>
+          </div>
+        </div>
+
+        <button id="btnReward" class="reward-btn">🎁 보상 보기</button>
+        <div id="rewardPanel" class="reward-panel hidden">
+          <div class="reward-head">
+            <span class="reward-title" id="rewardTitle">1~5회 보상</span>
+            <div class="reward-head-btns">
+              <button id="btnRewardAll" class="toggle-btn">전체 보기</button>
+              <button id="btnRewardClose" class="toggle-btn close-btn">✕ 닫기</button>
+            </div>
+          </div>
+          <div class="reward-table-wrap">
+            <table class="stats-table reward-table" id="rewardTable">
+              <thead>
+                <tr id="rewardHead"></tr>
+              </thead>
+              <tbody id="rewardPanelBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="guess" class="guess"></div>
+        <p class="guess-hint" id="guessHint">이 값보다 큽니까, 작습니까?</p>
+      </div>
+
+      <div class="info">
+        <div class="col">
+          <div class="label">현재 범위</div>
+          <div id="range" class="value">1 ~ 9999</div>
+        </div>
+        <div class="col">
+          <div class="label">시도 횟수</div>
+          <div id="attempt" class="value">1 / 14</div>
+        </div>
+      </div>
+
+      <div class="rangebar">
+        <div class="bar"><div id="currange" class="cur"></div></div>
+        <div class="bar-labels"><span>1</span><span>9999</span></div>
+      </div>
+
+      <div id="error" class="error hidden">응답이 이전 선택과 모순됩니다. 숫자를 다시 확인해주세요.</div>
+
+      <div class="buttons">
+        <button id="btnBigger">⬆️ 값이 큼</button>
+        <button id="btnAnswer">🎯 정답</button>
+        <button id="btnSmaller">⬇️ 값이 작음</button>
+      </div>
+    </div>
+
+    <div class="card history">
+      <h3>추측 기록</h3>
+      <ul id="history"></ul>
+    </div>
+  </div>
+
+  <!-- 결과 화면 (확률표 위로) -->
+  <div id="resultScreen" class="hidden">
+    <div class="card result">
+      <div class="emoji" id="resEmoji">🎉</div>
+      <h2 id="resTitle">맞혔습니다!</h2>
+      <div id="resRows"></div>
+      <div class="rating" id="resRating"></div>
+    </div>
+    <div class="card history">
+      <h3>추측 기록</h3>
+      <ul id="resHistory"></ul>
+    </div>
+    <button id="btnRestart" class="restart-btn">🔄 금고 다시 열기</button>
+  </div>
+
+  <!-- 회차별 통계 표 (결과 화면 아래) -->
+  <div id="statsCard" class="card">
+    <div class="stats-head">
+      <h3>회차별 성공 확률 & 기대값</h3>
+      <span class="note">1~9999 균등 · 이분 탐색</span>
+    </div>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>회차</th>
+          <th>성공 확률</th>
+          <th>누적 기대값</th>
+        </tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 전체 보상 모달 -->
+<div id="rewardModal" class="modal hidden">
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal-content">
+    <div class="modal-head">
+      <span class="modal-title">전체 보상</span>
+      <button id="btnModalClose" class="toggle-btn close-btn">✕ 닫기</button>
+    </div>
+    <div class="reward-table-wrap">
+      <table class="stats-table reward-table">
+        <thead>
+          <tr>
+            <th>1~5회</th>
+            <th>6~10회</th>
+            <th>11~13회</th>
+            <th>14회</th>
+          </tr>
+        </thead>
+        <tbody id="rewardModalBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOTAL_MIN = 1;
+const TOTAL_MAX = 9999;
+const NORMAL_MAX = 14;
+
+let state = null;
+
+const el = {
+  gameScreen: document.getElementById('gameScreen'),
+  resultScreen: document.getElementById('resultScreen'),
+  statsBody: document.getElementById('statsBody'),
+  probNow: document.getElementById('probNow'),
+  probCum: document.getElementById('probCum'),
+  guess: document.getElementById('guess'),
+  range: document.getElementById('range'),
+  attempt: document.getElementById('attempt'),
+  currange: document.getElementById('currange'),
+  error: document.getElementById('error'),
+  history: document.getElementById('history'),
+  btnBigger: document.getElementById('btnBigger'),
+  btnAnswer: document.getElementById('btnAnswer'),
+  btnSmaller: document.getElementById('btnSmaller'),
+  resRows: document.getElementById('resRows'),
+  resEmoji: document.getElementById('resEmoji'),
+  resTitle: document.getElementById('resTitle'),
+  resRating: document.getElementById('resRating'),
+  resHistory: document.getElementById('resHistory'),
+  btnRestart: document.getElementById('btnRestart'),
+  btnReward: document.getElementById('btnReward'),
+  rewardPanel: document.getElementById('rewardPanel'),
+  rewardTitle: document.getElementById('rewardTitle'),
+  btnRewardAll: document.getElementById('btnRewardAll'),
+  btnRewardClose: document.getElementById('btnRewardClose'),
+  rewardHead: document.getElementById('rewardHead'),
+  rewardPanelBody: document.getElementById('rewardPanelBody'),
+  mainHeader: document.getElementById('mainHeader'),
+  guessHint: document.getElementById('guessHint'),
+  rewardModal: document.getElementById('rewardModal'),
+  modalOverlay: document.getElementById('modalOverlay'),
+  btnModalClose: document.getElementById('btnModalClose'),
+  rewardModalBody: document.getElementById('rewardModalBody'),
+};
+
+let rewardOpen = false;
+
+function getNextGuess(min, max) {
+  return Math.floor((min + max) / 2);
+}
+
+// ---------- 시도 횟수별 보상 (item_list.csv) ----------
+// 4개 구간: 1~5회, 6~10회, 11~13회, 14회
+const REWARD_GROUPS = [
+  { name: '1~5회', attempts: [1, 2, 3, 4, 5], items: [
+    '21st 소원 종이 1개', '이브닝 세라핌 마법서 5개', '프리즈마 프리즘 콤팩트 3개',
+    '진심 1000% 하트 50개', '선택받은 마음의 원석 1000개', '프리즈마 코인 꾸러미 (특) 10개',
+    '전설의 열쇠 주머니 II 3개', '프로페서의 마법 지팡이 5개', '해원의 수호 상자 1개',
+    '7대 죄악의 상자 1개', '7대 주선의 상자 1개', '승리의 기념품 스페셜 상자 1개',
+    'Lite.1 프레스티지 변경권 1개', 'Lite.1 프라임 변경권 1개', 'Lite.1 레인보우 변경권 1개',
+    'Lite.1 골드 변경권 1개', '마스터 러닝 포션 1개', '테런 낚싯대 3일'
+  ]},
+  { name: '6~10회', attempts: [6, 7, 8, 9, 10], items: [
+    '21st 결정 주머니 1개', '21st 기념 꾸러미 100개', '이브닝 세라핌 마법서 2개',
+    '이브닝 세라핌 열쇠 2개', '진심 1000% 하트 20개', '선택받은 마음의 원석 300개',
+    '프리즈마 상자 100개', '프리즈마 코인 꾸러미 (특) 5개', '화려한 열쇠 주머니 II 10개',
+    '프로페서 지렁이 500개', '수룡의 계보 1개', '7대 죄악 영혼 교환권 1개',
+    '7대 주선 기운 교환권 1개', 'Lite.1 레전더리 변경권 1개', 'Lite.1 펫 히든 변경권 1개',
+    '전설의 박스 티켓 20개', '화려한 박스 티켓 30개', '시니어 러닝 포션 1개',
+    '특별한 열매 주머니 2개', '테런 낚싯대 3시간'
+  ]},
+  { name: '11~13회', attempts: [11, 12, 13], items: [
+    '21st 기념 꾸러미 25개', '이브닝 세라핌 깃털 1개', '프리즈마 스페셜 콤팩트 2개',
+    '진심 1000% 하트 2개', '선택받은 마음의 원석 50개', '프리즈마 상자 10개',
+    '프리즈마 열쇠 10개', '프리즈마 코인 꾸러미 (중) 1개', '프리즈마 변신 포션 50개',
+    '빛나는 열쇠 주머니 II 3개', '프로페서 지렁이 50개', '황금 나침반 3개',
+    '매지컬 샤인 3개', '송충이 10개', '영혼의 독설 20개', '마스터 코인 30개',
+    '화려한 박스 티켓 9개', '빛나는 박스 티켓 12개', '주니어 러닝 포션 1개',
+    '비기너 러닝 포션 1개', '작은 열매 주머니 10개', '꽃기사 지렁이 100개',
+    '중급 지렁이 선택권 1개', '다이아 갯지렁이 150개', '테런 낚싯대 1시간',
+    '스케일 커스텀 쿠폰 2개', '염색 쿠폰 5개'
+  ]},
+  { name: '14회', attempts: [14], items: [
+    '21st 기념 꾸러미 10개', '프리즈마 스페셜 콤팩트 1개', '진심 1000% 하트 1개',
+    '선택받은 마음의 원석 10개', '프리즈마 상자 3개', '프리즈마 열쇠 3개',
+    '프리즈마 코인 30개', '프리즈마 변신 포션 10개', '사물함 열쇠 주머니 11 3개',
+    '프로페서 지렁이 20개', '황금 나침반 1개', '매지컬 샤인 1개',
+    '송충이 3개', '영혼의 독설 5개', '퓨어 테라피 15개', '프리즘 스타 20개',
+    '마스터 코인 10개', '빛나는 박스 티켓 3개', '평범한 박스 티켓 3개',
+    '꽃기사 지렁이 20개', '무지개 왕관 지렁이 20개', '해왕강림 지렁이 20개',
+    '선샤인 지렁이 20개', '별빛 지렁이 20개', '승리의 지렁이 20개',
+    '다이아 갯지렁이 50개', '테런 낚싯대 15분', '스케일 커스텀 쿠폰 1개', '염색 쿠폰 2개'
+  ]}
+];
+
+// 시도 횟수에 해당하는 보상 구간 인덱스 반환 (없으면 -1)
+function rewardGroupIndex(a) {
+  for (let i = 0; i < REWARD_GROUPS.length; i++) {
+    if (REWARD_GROUPS[i].attempts.indexOf(a) !== -1) return i;
+  }
+  return -1;
+}
+
+// 보상 패널 렌더링: 현재 시도 횟수 구간만 표시
+function renderRewardPanel() {
+  const a = state ? state.attempt : 1;
+  const idx = rewardGroupIndex(a);
+
+  let headHtml = '';
+  let title;
+  if (idx === -1) { headHtml = '<th>보상</th>'; title = '보상 없음'; }
+  else { headHtml = '<th class="active-col">' + REWARD_GROUPS[idx].name + ' 보상</th>'; title = REWARD_GROUPS[idx].name + ' 보상'; }
+  el.rewardHead.innerHTML = headHtml;
+  el.rewardTitle.textContent = title;
+
+  const cols = idx === -1 ? [] : [REWARD_GROUPS[idx]];
+  const maxRows = cols.length
+    ? Math.max.apply(null, cols.map(function (g) { return g.items.length; }))
+    : 0;
+
+  let bodyHtml = '';
+  if (cols.length === 0) {
+    bodyHtml = '<tr><td>해당 횟수의 보상이 없습니다.</td></tr>';
+  }
+  for (let r = 0; r < maxRows; r++) {
+    bodyHtml += '<tr>';
+    cols.forEach(function (g) {
+      const item = g.items[r];
+      bodyHtml += '<td class="active-col">' + (item || '-') + '</td>';
+    });
+    bodyHtml += '</tr>';
+  }
+  el.rewardPanelBody.innerHTML = bodyHtml;
+}
+
+// 보상 패널 열기: 상단 레이아웃 숨겨 공간 확보
+function openRewardPanel() {
+  rewardOpen = true;
+  el.btnReward.classList.add('hidden');
+  el.rewardPanel.classList.remove('hidden');
+  el.mainHeader.classList.add('hidden');
+  el.guessHint.classList.add('hidden');
+  renderRewardPanel();
+}
+
+// 보상 패널 닫기: 상단 레이아웃 복원
+function closeRewardPanel() {
+  rewardOpen = false;
+  el.rewardPanel.classList.add('hidden');
+  el.btnReward.classList.remove('hidden');
+  el.mainHeader.classList.remove('hidden');
+  el.guessHint.classList.remove('hidden');
+}
+
+// 전체 보상 모달 열기
+function openRewardModal() {
+  const a = state ? state.attempt : 1;
+  let bodyHtml = '';
+  const maxRows = Math.max.apply(null, REWARD_GROUPS.map(function (g) { return g.items.length; }));
+  for (let r = 0; r < maxRows; r++) {
+    bodyHtml += '<tr>';
+    REWARD_GROUPS.forEach(function (g) {
+      const item = g.items[r];
+      const active = g.attempts.indexOf(a) !== -1 ? ' class="active-col"' : '';
+      bodyHtml += '<td' + active + '>' + (item || '-') + '</td>';
+    });
+    bodyHtml += '</tr>';
+  }
+  el.rewardModalBody.innerHTML = bodyHtml;
+  el.rewardModal.classList.remove('hidden');
+}
+
+// 전체 보상 모달 닫기
+function closeRewardModal() {
+  el.rewardModal.classList.add('hidden');
+}
+
+// ---------- 회차별 통계 계산 ----------
+
+// 1~9999 각 정답에 대해 이분 탐색 시도 횟수를 세어 회차별 성공 개수 계산
+function computeAttemptCounts() {
+  const counts = new Array(NORMAL_MAX + 1).fill(0);
+  for (let target = TOTAL_MIN; target <= TOTAL_MAX; target++) {
+    let min = TOTAL_MIN, max = TOTAL_MAX, attempt = 1;
+    while (attempt <= NORMAL_MAX) {
+      const guess = getNextGuess(min, max);
+      if (guess === target) { counts[attempt]++; break; }
+      if (target < guess) max = guess - 1; else min = guess + 1;
+      if (min > max) break;
+      attempt++;
+    }
+  }
+  return counts;
+}
+
+function renderStats() {
+  const counts = computeAttemptCounts();
+  const total = TOTAL_MAX - TOTAL_MIN + 1;
+  let cumCount = 0;
+
+  el.statsBody.innerHTML = '';
+
+  for (let a = 1; a <= NORMAL_MAX; a++) {
+    const count = counts[a];
+    cumCount += count;
+
+    const tr = document.createElement('tr');
+    tr.id = 'row-' + a;
+    const pct = (count / total * 100);
+    tr.innerHTML =
+      '<td>' + a + '회</td>' +
+      '<td class="mono">' + pct.toFixed(4) + '%</td>' +
+      '<td class="mono">' + (cumCount / total * 100).toFixed(4) + '%</td>';
+    el.statsBody.appendChild(tr);
+  }
+
+  // 합계 행
+  const tr = document.createElement('tr');
+  tr.className = 'total-row';
+  tr.innerHTML =
+    '<td>합계</td>' +
+    '<td class="mono">' + (cumCount / total * 100).toFixed(4) + '%</td>' +
+    '<td class="mono">100.0000%</td>';
+  el.statsBody.appendChild(tr);
+}
+
+// 게임 중 현재 회차의 확률/기대값을 상단에 표시 (애니메이션 포함)
+function updateProbDisplay(a) {
+  const total = TOTAL_MAX - TOTAL_MIN + 1;
+  const counts = computeAttemptCounts();
+  let cumCount = 0;
+  for (let i = 1; i <= a; i++) cumCount += counts[i];
+
+  const nowPct = (counts[a] / total * 100);
+  const cumPct = (cumCount / total * 100);
+
+  el.probNow.textContent = nowPct.toFixed(4) + '%';
+  el.probCum.textContent = cumPct.toFixed(4) + '%';
+
+  // 애니메이션 재트리거
+  el.probNow.classList.remove('flash');
+  void el.probNow.offsetWidth;
+  el.probNow.classList.add('flash');
+  el.probCum.classList.remove('flash');
+  void el.probCum.offsetWidth;
+  el.probCum.classList.add('flash');
+}
+
+// 자릿수별 이동 표시를 큰 추측 숫자에 직접 적용
+// 각 자리 위에 ▲(빨강, 위로) / ▼(파랑, 아래로) 칸 수 표시. 변화 없으면 표시 안 함
+function renderDigitChange() {
+  const pStr = state.prevGuess === null
+    ? null
+    : String(state.prevGuess).padStart(4, '0');
+  const cStr = String(state.guess).padStart(4, '0');
+
+  let html = '';
+  for (let i = 0; i < 4; i++) {
+    const cD = parseInt(cStr[i], 10);
+
+    let arrow = '';
+    if (pStr !== null) {
+      const pD = parseInt(pStr[i], 10);
+      if (pD !== cD) {
+        // 0~9 원형 기준 최단 이동
+        const upSteps = (cD - pD + 10) % 10;
+        const downSteps = (pD - cD + 10) % 10;
+        if (upSteps <= downSteps) {
+          arrow = '<span class="arr up">▲' + upSteps + '</span>';
+        } else {
+          arrow = '<span class="arr down">▼' + downSteps + '</span>';
+        }
+      }
+    }
+
+    html +=
+      '<div class="dcol">' +
+        '<div class="arr-box">' + arrow + '</div>' +
+        '<div class="dnum">' + cD + '</div>' +
+      '</div>';
+  }
+
+  el.guess.innerHTML = html;
+}
+
+// 현재 시도 회차의 행을 하이라이트 (애니메이션)
+function highlightAttempt(a) {
+  // 기존 하이라이트 제거
+  const prev = el.statsBody.querySelectorAll('.highlight-row');
+  prev.forEach(function (r) { r.classList.remove('highlight-row'); });
+
+  const tr = document.getElementById('row-' + a);
+  if (!tr) return;
+  // 애니메이션 재트리거
+  tr.classList.remove('highlight-row');
+  void tr.offsetWidth;
+  tr.classList.add('highlight-row');
+}
+
+// ---------- 게임 ----------
+
+function start() {
+  state = {
+    min: TOTAL_MIN,
+    max: TOTAL_MAX,
+    guess: getNextGuess(TOTAL_MIN, TOTAL_MAX),
+    prevGuess: null,
+    attempt: 1,
+    limit: NORMAL_MAX,
+    history: [],
+    gameState: 'playing'
+  };
+
+  el.gameScreen.classList.remove('hidden');
+  el.resultScreen.classList.add('hidden');
+  el.error.classList.add('hidden');
+  el.btnBigger.disabled = false;
+  el.btnAnswer.disabled = false;
+  el.btnSmaller.disabled = false;
+
+  render();
+  popGuess();
+  highlightAttempt(1);
+  updateProbDisplay(1);
+  renderDigitChange();
+  renderRewardPanel();
+}
+
+function render() {
+  el.range.textContent = state.min + ' ~ ' + state.max;
+  el.attempt.textContent = state.attempt + ' / ' + state.limit;
+
+  // 경계값: 추측값이 하한이면 '작음' 불가, 상한이면 '큼' 불가
+  if (state.gameState === 'playing') {
+    el.btnSmaller.disabled = state.guess <= state.min;
+    el.btnBigger.disabled = state.guess >= state.max;
+  }
+
+  const total = TOTAL_MAX - TOTAL_MIN + 1;
+  const leftPct = Math.max(0, ((state.min - TOTAL_MIN) / (total - 1)) * 100);
+  const widthPct = Math.max(0, ((state.max - state.min + 1) / total) * 100);
+  el.currange.style.left = leftPct + '%';
+  el.currange.style.width = widthPct + '%';
+
+  el.history.innerHTML = '';
+  state.history.forEach(function (h, i) {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="no">#' + (i + 1) + '</span><span>' + h.guess + '</span><span class="' + h.cls + '">' + h.label + '</span>';
+    el.history.appendChild(li);
+  });
+}
+
+function popGuess() {
+  el.guess.classList.remove('pop');
+  void el.guess.offsetWidth;
+  el.guess.classList.add('pop');
+}
+
+function pushHistory(result, label, cls) {
+  state.history.push({ guess: state.guess, answer: result, label: label, cls: cls });
+}
+
+function disableButtons() {
+  el.btnBigger.disabled = true;
+  el.btnAnswer.disabled = true;
+  el.btnSmaller.disabled = true;
+}
+
+function nextGuess() {
+  if (state.min > state.max) {
+    // 응답 모순 (이론상 발생하지 않음, 사용자 응답 오류)
+    el.error.classList.remove('hidden');
+    disableButtons();
+    return;
+  }
+  state.prevGuess = state.guess;
+  state.attempt++;
+  state.guess = getNextGuess(state.min, state.max);
+  render();
+  popGuess();
+  updateProbDisplay(state.attempt);
+  renderDigitChange();
+  renderRewardPanel();
+
+  // 14회에 도달하면 해당 추측이 반드시 정답 → 자동으로 정답 표시
+  if (state.attempt >= state.limit) {
+    pushHistory('answer', '🎯 정답', 'res-ok');
+    state.gameState = 'won';
+    render();
+    showResult();
+  }
+}
+
+function bigger() {
+  if (state.gameState !== 'playing') return;
+  pushHistory('bigger', '⬆️ 값이 큼', 'res-big');
+  state.min = state.guess + 1;
+  nextGuess();
+}
+
+function smaller() {
+  if (state.gameState !== 'playing') return;
+  pushHistory('smaller', '⬇️ 값이 작음', 'res-small');
+  state.max = state.guess - 1;
+  nextGuess();
+}
+
+function answer() {
+  if (state.gameState !== 'playing') return;
+  pushHistory('answer', '🎯 정답', 'res-ok');
+  state.gameState = 'won';
+  showResult();
+}
+
+function getRating(n) {
+  if (n <= 5) return '⚡ 초고속';
+  if (n <= 9) return '🔥 빠름';
+  if (n <= 12) return '👍 성공';
+  if (n === 13) return '😮 거의 끝까지 갔네요';
+  return '🎯 정확히 찾아냈습니다';
+}
+
+function addResultRow(k, v) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  const kk = document.createElement('span');
+  kk.className = 'k';
+  kk.textContent = k;
+  const vv = document.createElement('span');
+  vv.className = 'v';
+  vv.textContent = v;
+  row.appendChild(kk);
+  row.appendChild(vv);
+  el.resRows.appendChild(row);
+}
+
+function showResult() {
+  el.gameScreen.classList.add('hidden');
+  el.resultScreen.classList.remove('hidden');
+
+  el.resRows.innerHTML = '';
+  el.resEmoji.textContent = '🎉';
+  el.resTitle.textContent = '맞혔습니다!';
+  addResultRow('스핑크스가 생각한 숫자', state.guess);
+  addResultRow('제가 맞힌 숫자', state.guess);
+  addResultRow('총 시도 횟수', state.attempt + '회');
+  el.resRating.textContent = getRating(state.attempt);
+
+  el.resHistory.innerHTML = '';
+  state.history.forEach(function (h, i) {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="no">#' + (i + 1) + '</span><span>' + h.guess + '</span><span class="' + h.cls + '">' + h.label + '</span>';
+    el.resHistory.appendChild(li);
+  });
+}
+
+// ---------- 이벤트 ----------
+
+el.btnBigger.addEventListener('click', bigger);
+el.btnAnswer.addEventListener('click', answer);
+el.btnSmaller.addEventListener('click', smaller);
+el.btnReward.addEventListener('click', openRewardPanel);
+el.btnRewardClose.addEventListener('click', closeRewardPanel);
+el.btnRewardAll.addEventListener('click', openRewardModal);
+el.btnModalClose.addEventListener('click', closeRewardModal);
+el.modalOverlay.addEventListener('click', closeRewardModal);
+el.btnRestart.addEventListener('click', function () {
+  el.gameScreen.classList.remove('hidden');
+  el.resultScreen.classList.add('hidden');
+  start();
+});
+
+renderStats();
+start();
+</script>
+</body>
+</html>
