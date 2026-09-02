@@ -18,65 +18,65 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 6px 16px 24px;
+    padding: 4px 12px 16px;
     overflow-x: hidden;
     overflow-y: auto;
   }
 
-  .container { width: 100%; max-width: 540px; min-width: 0; }
+  .container { width: 100%; max-width: 480px; min-width: 0; }
 
   header {
     text-align: center;
-    margin-bottom: 22px;
-    padding-bottom: 14px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 1px solid rgba(212, 175, 55, 0.35);
     position: relative;
   }
   header .vault-ornament {
-    font-size: 1.9rem;
+    font-size: 1.2rem;
     letter-spacing: 8px;
     color: #d4af37;
     text-shadow: 0 0 18px rgba(212, 175, 55, 0.5);
   }
   header h1 {
-    font-size: 1.7rem;
+    font-size: 1.25rem;
     color: #f0c75e;
-    margin-top: 4px;
+    margin-top: 2px;
     letter-spacing: 4px;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
   }
   header .desc {
-    margin-top: 10px;
-    font-size: 0.9rem;
+    margin-top: 6px;
+    font-size: 0.8rem;
     color: #b7a477;
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
   .card {
     background: linear-gradient(180deg, rgba(60, 44, 18, 0.5), rgba(28, 19, 8, 0.65));
     border: 1px solid rgba(212, 175, 55, 0.28);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 18px;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
     box-shadow: 0 4px 22px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(240, 199, 94, 0.12);
   }
 
-  .stat-grid { display: flex; gap: 10px; }
+  .stat-grid { display: flex; gap: 8px; }
   .stat {
     flex: 1;
     background: rgba(15, 10, 4, 0.55);
     border: 1px solid rgba(212, 175, 55, 0.22);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 8px;
+    padding: 8px;
     text-align: center;
   }
-  .stat .slabel { font-size: 0.75rem; color: #9c8a5f; }
-  .stat .svalue { font-size: 1.05rem; font-weight: 700; color: #f0c75e; margin-top: 4px; }
+  .stat .slabel { font-size: 0.7rem; color: #9c8a5f; }
+  .stat .svalue { font-size: 0.95rem; font-weight: 700; color: #f0c75e; margin-top: 2px; }
 
   .run-btn {
     width: 100%;
-    padding: 16px;
-    font-size: 1.15rem;
+    padding: 12px;
+    font-size: 1.05rem;
     font-weight: 700;
     border: none;
     border-radius: 12px;
@@ -161,34 +161,34 @@
   .guess-section { text-align: center; }
   .guess-section .mode-tag {
     display: inline-block;
-    padding: 4px 14px;
+    padding: 3px 12px;
     border-radius: 999px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     background: rgba(212, 175, 55, 0.12);
     border: 1px solid rgba(212, 175, 55, 0.3);
     color: #e8c25c;
     letter-spacing: 2px;
   }
-  .prompt { font-size: 0.95rem; color: #b7a477; margin-bottom: 6px; }
+  .prompt { font-size: 0.9rem; color: #b7a477; margin-bottom: 4px; }
 
-  .prob-strip { display: flex; gap: 12px; margin: 14px 0 6px; }
+  .prob-strip { display: flex; gap: 8px; margin: 10px 0 4px; }
   .prob-item {
     flex: 1;
     background: rgba(15, 10, 4, 0.55);
     border: 1px solid rgba(212, 175, 55, 0.22);
-    border-radius: 14px;
-    padding: 10px 6px;
+    border-radius: 10px;
+    padding: 7px 6px;
     text-align: center;
   }
-  .prob-item .plabel { font-size: 0.72rem; color: #9c8a5f; display: block; }
+  .prob-item .plabel { font-size: 0.68rem; color: #9c8a5f; display: block; }
   .prob-item .pvalue {
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #38bdf8;
-    margin-top: 2px;
+    margin-top: 1px;
     font-variant-numeric: tabular-nums;
   }
   .prob-item.cum { background: rgba(212, 175, 55, 0.1); border-color: rgba(212, 175, 55, 0.35); }
@@ -201,9 +201,9 @@
 
   .reward-btn {
     width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 0.9rem;
+    margin-top: 8px;
+    padding: 8px;
+    font-size: 0.85rem;
     font-weight: 700;
     border: 1px solid rgba(212, 175, 55, 0.35);
     border-radius: 10px;
@@ -289,13 +289,13 @@
   }
 
   .guess {
-    font-size: 4rem;
+    font-size: 3rem;
     font-weight: 800;
     color: #f0c75e;
     line-height: 1.2;
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     text-shadow: 0 0 22px rgba(212, 175, 55, 0.45);
   }
   .guess.pop { animation: pop 0.35s ease; }
@@ -304,28 +304,93 @@
     40%  { transform: scale(1.12); color: #fff7dd; }
     100% { transform: scale(1); }
   }
-  .guess .dcol { text-align: center; line-height: 1.1; }
+  .guess .dcol {
+    text-align: center;
+    line-height: 1.1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
   .guess .dcol .arr-box {
-    height: 1.2em;
-    font-size: 1.1rem;
+    height: 1em;
+    font-size: 0.9rem;
     font-weight: 800;
-    line-height: 1.2em;
+    line-height: 1em;
   }
   .guess .dcol .arr { font-variant-numeric: tabular-nums; }
   .guess .dcol .arr.up { color: #f87171; }
   .guess .dcol .arr.down { color: #60a5fa; }
   .guess .dcol .dnum { line-height: 1.1; }
-  .guess-hint { font-size: 0.9rem; color: #b7a477; margin-top: 4px; }
+  .guess-hint { font-size: 0.85rem; color: #b7a477; margin-top: 4px; }
 
-  .info { display: flex; justify-content: space-between; margin-top: 20px; gap: 8px; }
+  /* 범위 직접 지정 */
+  .custom-range {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(15, 10, 4, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 10px;
+  }
+  .custom-range .cr-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .custom-range .cr-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #e8c25c;
+  }
+  .custom-range .cr-note {
+    font-size: 0.68rem;
+    color: #7a6a44;
+    text-align: right;
+  }
+  .custom-range .cr-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .custom-range input {
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    color: #e8d9b0;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    outline: none;
+  }
+  .custom-range input:focus { border-color: #f0c75e; }
+  .custom-range .cr-tilde { color: #9c8a5f; }
+  .custom-range .cr-apply {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(180deg, #e8c25c, #b8912e);
+    color: #1a1206;
+    transition: filter 0.1s ease;
+  }
+  .custom-range .cr-apply:hover { filter: brightness(1.1); }
+
+  .info { display: flex; justify-content: space-between; margin-top: 14px; gap: 8px; }
   .info .col { flex: 1; text-align: center; }
-  .info .label { font-size: 0.75rem; color: #9c8a5f; }
-  .info .value { font-size: 1.05rem; font-weight: 700; color: #e8d9b0; margin-top: 4px; }
+  .info .label { font-size: 0.72rem; color: #9c8a5f; }
+  .info .value { font-size: 0.95rem; font-weight: 700; color: #e8d9b0; margin-top: 2px; }
 
-  .rangebar { margin-top: 16px; }
+  .rangebar { margin-top: 10px; }
   .bar {
     position: relative;
-    height: 12px;
+    height: 10px;
     background: rgba(15, 10, 4, 0.6);
     border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 999px;
@@ -336,22 +401,22 @@
     background: linear-gradient(90deg, #d4af37, #f0c75e);
     border-radius: 999px; transition: left 0.25s ease, width 0.25s ease;
   }
-  .bar-labels { display: flex; justify-content: space-between; font-size: 0.72rem; color: #7a6a44; margin-top: 4px; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: #7a6a44; margin-top: 3px; }
 
   .error {
-    margin-top: 14px;
-    padding: 12px 16px;
+    margin-top: 10px;
+    padding: 10px 12px;
     background: rgba(248, 113, 113, 0.14);
     border: 1px solid rgba(248, 113, 113, 0.4);
     border-radius: 10px;
     color: #fca5a5;
     text-align: center;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
-  .buttons { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+  .buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
   .buttons button {
-    padding: 17px; font-size: 1.25rem; font-weight: 700; border: none; border-radius: 13px;
+    padding: 13px; font-size: 1.1rem; font-weight: 700; border: none; border-radius: 12px;
     cursor: pointer; color: #1a1206;
     transition: transform 0.1s ease, filter 0.1s ease;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -363,24 +428,24 @@
   #btnAnswer { background: linear-gradient(180deg, #f0c75e, #c19a2c); }
   #btnSmaller { background: linear-gradient(180deg, #7db8e8, #3f7fc2); }
 
-  .history h3 { font-size: 1rem; color: #b7a477; margin-bottom: 10px; }
-  .history ul { list-style: none; max-height: 200px; overflow-y: auto; }
-  .history li { display: flex; justify-content: space-between; padding: 6px 10px; font-size: 0.95rem; border-radius: 8px; }
+  .history h3 { font-size: 0.9rem; color: #b7a477; margin-bottom: 6px; }
+  .history ul { list-style: none; max-height: 140px; overflow-y: auto; }
+  .history li { display: flex; justify-content: space-between; padding: 4px 8px; font-size: 0.85rem; border-radius: 8px; }
   .history li:nth-child(odd) { background: rgba(212, 175, 55, 0.06); }
   .history .no { color: #7a6a44; margin-right: 10px; }
   .res-big { color: #7fd4a0; }
   .res-small { color: #7db8e8; }
   .res-ok { color: #f0c75e; }
 
-  .result .emoji { text-align: center; font-size: 3.2rem; }
-  .result h2 { text-align: center; margin: 8px 0 18px; color: #f0c75e; letter-spacing: 3px; }
-  .result .row { display: flex; justify-content: space-between; padding: 10px 4px; border-bottom: 1px solid rgba(212, 175, 55, 0.12); }
+  .result .emoji { text-align: center; font-size: 2.4rem; }
+  .result h2 { text-align: center; margin: 6px 0 12px; color: #f0c75e; letter-spacing: 3px; }
+  .result .row { display: flex; justify-content: space-between; padding: 7px 4px; border-bottom: 1px solid rgba(212, 175, 55, 0.12); }
   .result .row .k { color: #9c8a5f; }
-  .result .row .v { font-weight: 700; font-size: 1.1rem; color: #fff; }
-  .result .rating { text-align: center; font-size: 1.15rem; font-weight: 700; color: #f0c75e; margin-top: 18px; }
+  .result .row .v { font-weight: 700; font-size: 1rem; color: #fff; }
+  .result .rating { text-align: center; font-size: 1rem; font-weight: 700; color: #f0c75e; margin-top: 12px; }
 
   .restart-btn {
-    display: block; width: 100%; padding: 18px; margin-top: 20px; font-size: 1.3rem; font-weight: 700;
+    display: block; width: 100%; padding: 13px; margin-top: 12px; font-size: 1.1rem; font-weight: 700;
     border: none; border-radius: 14px; cursor: pointer;
     background: linear-gradient(180deg, #e8c25c, #b8912e); color: #1a1206;
     transition: transform 0.1s ease, filter 0.1s ease;
@@ -477,7 +542,7 @@
   <div id="gameScreen" class="hidden">
     <div class="card">
       <div class="guess-section">
-        <span class="mode-tag">✦ 이분 탐색 ✦</span>
+        <span class="mode-tag" id="modeTag">✦ 이분 탐색 ✦</span>
         <p class="prompt">스핑크스가 생각한 숫자는...</p>
 
         <div class="prob-strip">
@@ -528,6 +593,20 @@
       <div class="rangebar">
         <div class="bar"><div id="currange" class="cur"></div></div>
         <div class="bar-labels"><span>1</span><span>9999</span></div>
+      </div>
+
+      <!-- 범위 직접 지정 (범위 표시 아래 확장) -->
+      <div class="custom-range">
+        <div class="cr-head">
+          <span class="cr-label">범위 직접 지정</span>
+          <span class="cr-note">지정하면 14회 제한 없이 중간 숫자를 알려드립니다.</span>
+        </div>
+        <div class="cr-inputs">
+          <input id="crMin" type="number" min="1" max="9999" inputmode="numeric" placeholder="1">
+          <span class="cr-tilde">~</span>
+          <input id="crMax" type="number" min="1" max="9999" inputmode="numeric" placeholder="9999">
+          <button id="crApply" class="cr-apply">적용</button>
+        </div>
       </div>
 
       <div id="error" class="error hidden">응답이 이전 선택과 모순됩니다. 숫자를 다시 확인해주세요.</div>
@@ -621,6 +700,7 @@ const el = {
   probNow: document.getElementById('probNow'),
   probCum: document.getElementById('probCum'),
   guess: document.getElementById('guess'),
+  modeTag: document.getElementById('modeTag'),
   range: document.getElementById('range'),
   attempt: document.getElementById('attempt'),
   currange: document.getElementById('currange'),
@@ -629,13 +709,16 @@ const el = {
   btnBigger: document.getElementById('btnBigger'),
   btnAnswer: document.getElementById('btnAnswer'),
   btnSmaller: document.getElementById('btnSmaller'),
+  btnReward: document.getElementById('btnReward'),
+  crMin: document.getElementById('crMin'),
+  crMax: document.getElementById('crMax'),
+  crApply: document.getElementById('crApply'),
   resRows: document.getElementById('resRows'),
   resEmoji: document.getElementById('resEmoji'),
   resTitle: document.getElementById('resTitle'),
   resRating: document.getElementById('resRating'),
   resHistory: document.getElementById('resHistory'),
   btnRestart: document.getElementById('btnRestart'),
-  btnReward: document.getElementById('btnReward'),
   rewardPanel: document.getElementById('rewardPanel'),
   rewardTitle: document.getElementById('rewardTitle'),
   btnRewardAll: document.getElementById('btnRewardAll'),
@@ -854,7 +937,7 @@ function updateProbDisplay(a) {
 }
 
 // 자릿수별 이동 표시를 큰 추측 숫자에 직접 적용
-// 각 자리 위에 ▲(빨강, 위로) / ▼(파랑, 아래로) 칸 수 표시. 변화 없으면 표시 안 함
+// 커지면(위로) ▲가 숫자 위에서, 작아지면(아래로) ▼가 숫자 아래에서 등장
 function renderDigitChange() {
   const pStr = state.prevGuess === null
     ? null
@@ -865,7 +948,8 @@ function renderDigitChange() {
   for (let i = 0; i < 4; i++) {
     const cD = parseInt(cStr[i], 10);
 
-    let arrow = '';
+    let upArrow = '';
+    let downArrow = '';
     if (pStr !== null) {
       const pD = parseInt(pStr[i], 10);
       if (pD !== cD) {
@@ -873,17 +957,18 @@ function renderDigitChange() {
         const upSteps = (cD - pD + 10) % 10;
         const downSteps = (pD - cD + 10) % 10;
         if (upSteps <= downSteps) {
-          arrow = '<span class="arr up">▲' + upSteps + '</span>';
+          upArrow = '<span class="arr up">▲' + upSteps + '</span>';
         } else {
-          arrow = '<span class="arr down">▼' + downSteps + '</span>';
+          downArrow = '<span class="arr down">▼' + downSteps + '</span>';
         }
       }
     }
 
     html +=
       '<div class="dcol">' +
-        '<div class="arr-box">' + arrow + '</div>' +
+        '<div class="arr-box">' + upArrow + '</div>' +
         '<div class="dnum">' + cD + '</div>' +
+        '<div class="arr-box">' + downArrow + '</div>' +
       '</div>';
   }
 
@@ -914,6 +999,7 @@ function start() {
     prevGuess: null,
     attempt: 1,
     limit: NORMAL_MAX,
+    custom: false,
     history: [],
     gameState: 'playing'
   };
@@ -925,6 +1011,9 @@ function start() {
   el.btnAnswer.disabled = false;
   el.btnSmaller.disabled = false;
 
+  el.btnReward.classList.remove('hidden');
+  el.modeTag.textContent = '✦ 이분 탐색 ✦';
+
   render();
   popGuess();
   highlightAttempt(1);
@@ -933,9 +1022,58 @@ function start() {
   renderRewardPanel();
 }
 
+// 범위 직접 지정 모드로 전환
+function applyCustomRange() {
+  const min = parseInt(el.crMin.value, 10);
+  const max = parseInt(el.crMax.value, 10);
+
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < TOTAL_MIN || max > TOTAL_MAX || min > max) {
+    el.error.textContent = '범위는 1~9999 사이이고 min ≤ max여야 합니다.';
+    el.error.classList.remove('hidden');
+    return;
+  }
+  el.error.classList.add('hidden');
+
+  // 보상 패널 닫기 (있으면)
+  if (rewardOpen) closeRewardPanel();
+
+  state = {
+    min: min,
+    max: max,
+    guess: getNextGuess(min, max),
+    prevGuess: null,
+    attempt: 1,
+    limit: Infinity, // 14회 제한 없음
+    custom: true,
+    history: [],
+    gameState: 'playing'
+  };
+
+  el.btnReward.classList.add('hidden');
+  el.modeTag.textContent = '✦ 범위 지정 ✦';
+  el.btnBigger.disabled = false;
+  el.btnAnswer.disabled = false;
+  el.btnSmaller.disabled = false;
+
+  render();
+  popGuess();
+  updateProbDisplay(state.attempt);
+  renderDigitChange();
+}
+
 function render() {
   el.range.textContent = state.min + ' ~ ' + state.max;
-  el.attempt.textContent = state.attempt + ' / ' + state.limit;
+  if (state.custom) {
+    el.attempt.textContent = state.attempt + '회 (제한 없음)';
+  } else {
+    el.attempt.textContent = state.attempt + ' / ' + state.limit;
+  }
+
+  // 범위 입력 필드를 현재 범위로 동기화 (입력 중이 아닐 때만)
+  if (document.activeElement !== el.crMin && document.activeElement !== el.crMax) {
+    el.crMin.value = state.min;
+    el.crMax.value = state.max;
+  }
 
   // 경계값: 추측값이 하한이면 '작음' 불가, 상한이면 '큼' 불가
   if (state.gameState === 'playing') {
@@ -989,8 +1127,8 @@ function nextGuess() {
   renderDigitChange();
   renderRewardPanel();
 
-  // 14회에 도달하면 해당 추측이 반드시 정답 → 자동으로 정답 표시
-  if (state.attempt >= state.limit) {
+  // 14회에 도달하면 해당 추측이 반드시 정답 → 자동으로 정답 표시 (범위 지정 모드는 제외)
+  if (!state.custom && state.attempt >= state.limit) {
     pushHistory('answer', '🎯 정답', 'res-ok');
     state.gameState = 'won';
     render();
@@ -1071,6 +1209,9 @@ el.btnRewardClose.addEventListener('click', closeRewardPanel);
 el.btnRewardAll.addEventListener('click', openRewardModal);
 el.btnModalClose.addEventListener('click', closeRewardModal);
 el.modalOverlay.addEventListener('click', closeRewardModal);
+el.crApply.addEventListener('click', applyCustomRange);
+el.crMin.addEventListener('keydown', function (e) { if (e.key === 'Enter') applyCustomRange(); });
+el.crMax.addEventListener('keydown', function (e) { if (e.key === 'Enter') applyCustomRange(); });
 el.btnRestart.addEventListener('click', function () {
   el.gameScreen.classList.remove('hidden');
   el.resultScreen.classList.add('hidden');
