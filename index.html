@@ -427,6 +427,15 @@
   #btnBigger { background: linear-gradient(180deg, #7fd4a0, #3f9e6b); }
   #btnAnswer { background: linear-gradient(180deg, #f0c75e, #c19a2c); }
   #btnSmaller { background: linear-gradient(180deg, #7db8e8, #3f7fc2); }
+  .buttons .undo-btn {
+    background: rgba(148, 163, 184, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    color: #cbd5e1;
+    padding: 9px;
+    font-size: 0.9rem;
+  }
+  .buttons .undo-btn:hover { background: rgba(148, 163, 184, 0.22); }
+  .buttons .undo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   .history h3 { font-size: 0.9rem; color: #b7a477; margin-bottom: 6px; }
   .history ul { list-style: none; max-height: 140px; overflow-y: auto; }
@@ -615,6 +624,7 @@
         <button id="btnBigger">⬆️ 값이 큼</button>
         <button id="btnAnswer">🎯 정답</button>
         <button id="btnSmaller">⬇️ 값이 작음</button>
+        <button id="btnUndo" class="undo-btn">↩️ 되돌리기</button>
       </div>
     </div>
 
@@ -709,6 +719,7 @@ const el = {
   btnBigger: document.getElementById('btnBigger'),
   btnAnswer: document.getElementById('btnAnswer'),
   btnSmaller: document.getElementById('btnSmaller'),
+  btnUndo: document.getElementById('btnUndo'),
   btnReward: document.getElementById('btnReward'),
   crMin: document.getElementById('crMin'),
   crMax: document.getElementById('crMax'),
@@ -1001,6 +1012,7 @@ function start() {
     limit: NORMAL_MAX,
     custom: false,
     history: [],
+    undoStack: [],
     gameState: 'playing'
   };
 
@@ -1013,6 +1025,8 @@ function start() {
 
   el.btnReward.classList.remove('hidden');
   el.modeTag.textContent = '✦ 이분 탐색 ✦';
+
+  el.btnUndo.disabled = true;
 
   render();
   popGuess();
@@ -1046,6 +1060,7 @@ function applyCustomRange() {
     limit: Infinity, // 14회 제한 없음
     custom: true,
     history: [],
+    undoStack: [],
     gameState: 'playing'
   };
 
@@ -1054,6 +1069,7 @@ function applyCustomRange() {
   el.btnBigger.disabled = false;
   el.btnAnswer.disabled = false;
   el.btnSmaller.disabled = false;
+  el.btnUndo.disabled = true;
 
   render();
   popGuess();
@@ -1068,6 +1084,9 @@ function render() {
   } else {
     el.attempt.textContent = state.attempt + ' / ' + state.limit;
   }
+
+  // 되돌리기 버튼 상태
+  el.btnUndo.disabled = state.undoStack.length === 0;
 
   // 범위 입력 필드를 현재 범위로 동기화 (입력 중이 아닐 때만)
   if (document.activeElement !== el.crMin && document.activeElement !== el.crMax) {
@@ -1138,6 +1157,8 @@ function nextGuess() {
 
 function bigger() {
   if (state.gameState !== 'playing') return;
+  // 되돌리기용 이전 상태 저장
+  state.undoStack.push({ min: state.min, max: state.max, guess: state.guess, prevGuess: state.prevGuess, attempt: state.attempt, history: state.history.slice() });
   pushHistory('bigger', '⬆️ 값이 큼', 'res-big');
   state.min = state.guess + 1;
   nextGuess();
@@ -1145,9 +1166,28 @@ function bigger() {
 
 function smaller() {
   if (state.gameState !== 'playing') return;
+  // 되돌리기용 이전 상태 저장
+  state.undoStack.push({ min: state.min, max: state.max, guess: state.guess, prevGuess: state.prevGuess, attempt: state.attempt, history: state.history.slice() });
   pushHistory('smaller', '⬇️ 값이 작음', 'res-small');
   state.max = state.guess - 1;
   nextGuess();
+}
+
+function undoLast() {
+  if (state.gameState !== 'playing' || state.undoStack.length === 0) return;
+  const prev = state.undoStack.pop();
+  state.min = prev.min;
+  state.max = prev.max;
+  state.guess = prev.guess;
+  state.prevGuess = prev.prevGuess;
+  state.attempt = prev.attempt;
+  state.history = prev.history;
+  el.error.classList.add('hidden');
+  render();
+  popGuess();
+  updateProbDisplay(state.attempt);
+  renderDigitChange();
+  renderRewardPanel();
 }
 
 function answer() {
@@ -1204,6 +1244,7 @@ function showResult() {
 el.btnBigger.addEventListener('click', bigger);
 el.btnAnswer.addEventListener('click', answer);
 el.btnSmaller.addEventListener('click', smaller);
+el.btnUndo.addEventListener('click', undoLast);
 el.btnReward.addEventListener('click', openRewardPanel);
 el.btnRewardClose.addEventListener('click', closeRewardPanel);
 el.btnRewardAll.addEventListener('click', openRewardModal);
