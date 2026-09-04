@@ -324,6 +324,52 @@
   .guess .dcol .dnum { line-height: 1.1; }
   .guess-hint { font-size: 0.85rem; color: #b7a477; margin-top: 4px; }
 
+
+  /* 범위 바 추측 위치 마커 */
+  .gmarker {
+    position: absolute;
+    top: -4px;
+    width: 6px;
+    height: 16px;
+    background: #fff7dd;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 3px;
+    transform: translateX(-50%);
+    transition: left 0.25s ease;
+    z-index: 2;
+    box-shadow: 0 0 6px rgba(255, 247, 221, 0.7);
+  }
+
+  /* 결과 통계 & 공유 */
+  .result-stats {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #9c8a5f;
+    margin-top: 12px;
+  }
+  .share-btn {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(212, 175, 55, 0.1);
+    color: #e8c25c;
+    transition: all 0.15s;
+  }
+  .share-btn:hover { border-color: #f0c75e; background: rgba(212, 175, 55, 0.18); }
+
+  .key-hint {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #7a6a44;
+  }
+
   /* 범위 직접 지정 */
   .custom-range {
     margin-top: 10px;
@@ -542,6 +588,7 @@
     </a>
   </div>
   <header id="mainHeader">
+    
     <div class="vault-ornament">❖ ✦ ❖</div>
     <h1>🔐 스핑크스의 황금 금고</h1>
     <p class="desc">스핑크스가 정한 숫자를 맞혀 금고를 여세요.<br>이분 탐색으로 최대 14회 안에 찾아드립니다.</p>
@@ -597,10 +644,17 @@
           <div class="label">시도 횟수</div>
           <div id="attempt" class="value">1 / 14</div>
         </div>
+        <div class="col">
+          <div class="label">남은 후보</div>
+          <div id="candidates" class="value">9999개</div>
+        </div>
       </div>
 
       <div class="rangebar">
-        <div class="bar"><div id="currange" class="cur"></div></div>
+        <div class="bar">
+          <div id="currange" class="cur"></div>
+          <div id="guessMarker" class="gmarker"></div>
+        </div>
         <div class="bar-labels"><span>1</span><span>9999</span></div>
       </div>
 
@@ -641,6 +695,8 @@
       <h2 id="resTitle">맞혔습니다!</h2>
       <div id="resRows"></div>
       <div class="rating" id="resRating"></div>
+      <div class="result-stats" id="resultStats"></div>
+      <button id="btnShare" class="share-btn">📋 결과 복사</button>
     </div>
     <div class="card history">
       <h3>추측 기록</h3>
@@ -664,6 +720,26 @@
         </tr>
       </thead>
       <tbody id="statsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 플레이 기록 (localStorage) -->
+  <div id="playLogCard" class="card">
+    <div class="stats-head">
+      <h3>플레이 기록</h3>
+      <button id="btnStatsClear" class="toggle-btn close-btn">🗑 초기화</button>
+    </div>
+    <div id="playLogSummary" class="result-stats" style="margin-top:0;margin-bottom:10px;"></div>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>일시</th>
+          <th>모드</th>
+          <th>시도</th>
+          <th>정답</th>
+        </tr>
+      </thead>
+      <tbody id="playLogBody"></tbody>
     </table>
   </div>
 
@@ -713,13 +789,20 @@ const el = {
   modeTag: document.getElementById('modeTag'),
   range: document.getElementById('range'),
   attempt: document.getElementById('attempt'),
+  candidates: document.getElementById('candidates'),
   currange: document.getElementById('currange'),
+  guessMarker: document.getElementById('guessMarker'),
   error: document.getElementById('error'),
   history: document.getElementById('history'),
   btnBigger: document.getElementById('btnBigger'),
   btnAnswer: document.getElementById('btnAnswer'),
   btnSmaller: document.getElementById('btnSmaller'),
   btnUndo: document.getElementById('btnUndo'),
+  btnShare: document.getElementById('btnShare'),
+  resultStats: document.getElementById('resultStats'),
+  playLogSummary: document.getElementById('playLogSummary'),
+  playLogBody: document.getElementById('playLogBody'),
+  btnStatsClear: document.getElementById('btnStatsClear'),
   btnReward: document.getElementById('btnReward'),
   crMin: document.getElementById('crMin'),
   crMax: document.getElementById('crMax'),
@@ -745,6 +828,47 @@ const el = {
 };
 
 let rewardOpen = false;
+let lastShareText = '';
+
+// ---------- 플레이 통계 (localStorage) ----------
+const STATS_KEY = 'sphinx_vault_stats';
+
+function loadStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STATS_KEY));
+    if (s && typeof s.games === 'number') {
+      if (!Array.isArray(s.dist)) s.dist = [];
+      if (!Array.isArray(s.history)) s.history = [];
+      return s;
+    }
+  } catch (e) {}
+  return { games: 0, wins: 0, winAttemptSum: 0, best: null, dist: [], history: [] };
+}
+
+function saveStats(s) { try { localStorage.setItem(STATS_KEY, JSON.stringify(s)); } catch (e) {} }
+
+// 플레이 기록 표 렌더링
+function renderPlayLog() {
+  const stats = loadStats();
+  const avg = stats.wins ? (stats.winAttemptSum / stats.wins).toFixed(1) : '-';
+  el.playLogSummary.textContent = '총 ' + stats.games + '판 · 평균 ' + avg + '회 · 최고 ' + (stats.best !== null ? stats.best + '회' : '-');
+
+  el.playLogBody.innerHTML = '';
+  if (!stats.history.length) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" style="text-align:center;color:#7a6a44;">기록이 없습니다</td>';
+    el.playLogBody.appendChild(tr);
+    return;
+  }
+  stats.history.forEach(function (h) {
+    const d = new Date(h.date);
+    const dateStr = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+      String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="mono">' + dateStr + '</td><td>' + h.mode + '</td><td class="mono">' + h.attempt + '회</td><td class="mono" style="color:#f0c75e;">' + (h.answer !== undefined ? h.answer : '-') + '</td>';
+    el.playLogBody.appendChild(tr);
+  });
+}
 
 function getNextGuess(min, max) {
   return Math.floor((min + max) / 2);
@@ -1078,6 +1202,7 @@ function applyCustomRange() {
 }
 
 function render() {
+  const total = TOTAL_MAX - TOTAL_MIN + 1;
   el.range.textContent = state.min + ' ~ ' + state.max;
   if (state.custom) {
     el.attempt.textContent = state.attempt + '회 (제한 없음)';
@@ -1094,13 +1219,21 @@ function render() {
     el.crMax.value = state.max;
   }
 
+  // 남은 후보 수 & 필요 시도
+  const cand = state.max - state.min + 1;
+  if (cand <= 1) el.candidates.textContent = '1개 · 정답 확정';
+  else el.candidates.textContent = cand + '개 · ≤' + Math.ceil(Math.log2(cand)) + '회';
+
+  // 추측 위치 마커
+  const gPct = Math.max(0, Math.min(100, ((state.guess - TOTAL_MIN) / (total - 1)) * 100));
+  el.guessMarker.style.left = gPct + '%';
+
   // 경계값: 추측값이 하한이면 '작음' 불가, 상한이면 '큼' 불가
   if (state.gameState === 'playing') {
     el.btnSmaller.disabled = state.guess <= state.min;
     el.btnBigger.disabled = state.guess >= state.max;
   }
 
-  const total = TOTAL_MAX - TOTAL_MIN + 1;
   const leftPct = Math.max(0, ((state.min - TOTAL_MIN) / (total - 1)) * 100);
   const widthPct = Math.max(0, ((state.max - state.min + 1) / total) * 100);
   el.currange.style.left = leftPct + '%';
@@ -1231,6 +1364,25 @@ function showResult() {
   addResultRow('총 시도 횟수', state.attempt + '회');
   el.resRating.textContent = getRating(state.attempt);
 
+  // 통계 기록
+  const stats = loadStats();
+  stats.games++;
+  stats.wins++;
+  stats.winAttemptSum += state.attempt;
+  if (stats.best === null || state.attempt < stats.best) stats.best = state.attempt;
+  const di = Math.min(state.attempt, NORMAL_MAX);
+  stats.dist[di] = (stats.dist[di] || 0) + 1;
+  stats.history.unshift({ date: Date.now(), mode: state.custom ? '범위 지정' : '이분 탐색', attempt: state.attempt, answer: state.guess });
+  if (stats.history.length > 50) stats.history.length = 50;
+  saveStats(stats);
+  renderPlayLog();
+  const avg = stats.winAttemptSum / stats.wins;
+  el.resultStats.textContent = '📊 누적 ' + stats.games + '판 · 평균 ' + avg.toFixed(1) + '회 · 최고 ' + stats.best + '회';
+
+  // 공유 텍스트
+  lastShareText = '🔐 스핑크스의 황금 금고\n' + state.attempt + '회만에 클리어! ' + getRating(state.attempt) + '\n모드: ' + (state.custom ? '범위 지정' : '이분 탐색');
+
+
   el.resHistory.innerHTML = '';
   state.history.forEach(function (h, i) {
     const li = document.createElement('li');
@@ -1259,7 +1411,52 @@ el.btnRestart.addEventListener('click', function () {
   start();
 });
 
+// 결과 복사
+el.btnShare.addEventListener('click', function () {
+  const text = lastShareText || '🔐 스핑크스의 황금 금고';
+  const done = function () {
+    el.btnShare.textContent = '✅ 복사됨';
+    setTimeout(function () { el.btnShare.textContent = '📋 결과 복사'; }, 1500);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text); done(); });
+  } else {
+    fallbackCopy(text); done();
+  }
+});
+
+// 키보드 단축키
+window.addEventListener('keydown', function (e) {
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!el.resultScreen.classList.contains('hidden')) return; // 결과 화면에선 무시
+  if (e.key === 'ArrowUp') { e.preventDefault(); bigger(); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); smaller(); }
+  else if (e.key === 'Enter') { e.preventDefault(); answer(); }
+  else if (e.key === 'Backspace') { e.preventDefault(); undoLast(); }
+});
+
+// 결과 복사 폴백
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+}
+
+// 플레이 기록 초기화
+el.btnStatsClear.addEventListener('click', function () {
+  saveStats({ games: 0, wins: 0, winAttemptSum: 0, best: null, dist: [], history: [] });
+  renderPlayLog();
+});
+
 renderStats();
+renderPlayLog();
 start();
 </script>
 </body>
