@@ -826,37 +826,6 @@
     background: #111;
     image-rendering: pixelated;
   }
-  .capture-debug-wrap {
-    margin-top: 10px;
-    text-align: center;
-  }
-  .capture-debug-wrap .cp-label {
-    display: block;
-    font-size: 0.72rem;
-    color: #7a6a44;
-    margin-bottom: 6px;
-  }
-  .capture-debug-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  .cd-item {
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    border-radius: 6px;
-    padding: 4px;
-    background: rgba(0, 0, 0, 0.25);
-  }
-  .cd-title {
-    display: block;
-    font-size: 0.65rem;
-    color: #b7a477;
-    margin-bottom: 3px;
-  }
-  .cd-item .capture-preview {
-    max-height: 60px;
-    border: none;
-  }
   .capture-actions {
     display: flex;
     justify-content: center;
@@ -1195,29 +1164,7 @@
       <span class="cp-label">인식 영역 미리보기</span>
       <canvas id="capturePreview" class="capture-preview"></canvas>
     </div>
-    <div class="capture-debug-wrap hidden" id="captureDebugWrap">
-      <span class="cp-label">디버그 - 전처리 단계별 보기</span>
-      <div class="capture-debug-grid">
-        <div class="cd-item">
-          <span class="cd-title">회색 패널</span>
-          <canvas id="dbgGray" class="capture-preview"></canvas>
-        </div>
-        <div class="cd-item">
-          <span class="cd-title">OCR 입력 (원본)</span>
-          <canvas id="dbgYellow" class="capture-preview"></canvas>
-        </div>
-        <div class="cd-item">
-          <span class="cd-title">좌/우 분리</span>
-          <canvas id="dbgSplit" class="capture-preview"></canvas>
-        </div>
-        <div class="cd-item">
-          <span class="cd-title">OCR 입력 (원본)</span>
-          <canvas id="dbgBin" class="capture-preview"></canvas>
-        </div>
-      </div>
-    </div>
     <div class="capture-actions">
-      <button id="btnCaptureDebug" class="toggle-btn">🔍 디버그</button>
       <button id="btnCaptureConfirm" class="toggle-btn confirm-btn">✅ 확인</button>
     </div>
   </div>
@@ -1354,12 +1301,6 @@ const el = {
   captureBox: document.getElementById('captureBox'),
   captureMagnifier: document.getElementById('captureMagnifier'),
   magCanvas: document.getElementById('magCanvas'),
-  btnCaptureDebug: document.getElementById('btnCaptureDebug'),
-  captureDebugWrap: document.getElementById('captureDebugWrap'),
-  dbgGray: document.getElementById('dbgGray'),
-  dbgYellow: document.getElementById('dbgYellow'),
-  dbgSplit: document.getElementById('dbgSplit'),
-  dbgBin: document.getElementById('dbgBin'),
   captureGuide: document.getElementById('captureGuide'),
   captureStatus: document.getElementById('captureStatus'),
   btnCaptureConfirm: document.getElementById('btnCaptureConfirm'),
@@ -2007,7 +1948,6 @@ let capturePaused = false;  // 일시정지 상태
 let captureLastMin = null;
 let captureLastMax = null;
 let captureFirstDone = false;
-let captureDebug = false;   // 디버그 뷰 토글 상태
 
 // 모델 로딩 팝업 표시
 function showModelLoading(text) {
@@ -2419,81 +2359,6 @@ async function recognizeOneNumber(engine, canvas) {
   return { num: Number.isInteger(n) ? n : null, text: text, corrected: corrected };
 }
 
-// 디버그용: 전처리 단계별 이미지를 각 캔버스에 표시
-// panel(회색 패널 크롭), panels(패널 bbox 배열), leftCanvas/rightCanvas(패널 크롭)
-function drawDebugStages(raw, panels, panel, regions, leftCanvas, rightCanvas) {
-  try {
-    // 1) 회색 패널 bbox 들 (청록 박스)
-    let g = el.dbgGray.getContext('2d');
-    el.dbgGray.width = raw.width;
-    el.dbgGray.height = raw.height;
-    g.drawImage(raw, 0, 0);
-    if (panels && panels.length) {
-      g.strokeStyle = '#00ffcc';
-      g.lineWidth = 2;
-      panels.forEach(function (p) {
-        g.strokeRect(p.x0, p.y0, p.x1 - p.x0, p.y1 - p.y0);
-      });
-    } else {
-      g.fillStyle = '#ff5252';
-      g.font = '12px sans-serif';
-      g.fillText('패널(#919191) 못 찾음', 8, 16);
-    }
-
-    // 2) OCR 입력 뷰 (각 패널 원본 표시)
-    const yctx = el.dbgYellow.getContext('2d');
-    el.dbgYellow.width = raw.width;
-    el.dbgYellow.height = raw.height;
-    yctx.fillStyle = '#111';
-    yctx.fillRect(0, 0, raw.width, raw.height);
-    if (panels) {
-      panels.forEach(function (p) {
-        const pc = cropGrayPanel(raw, p);
-        if (pc) {
-          yctx.drawImage(pc, p.x0, p.y0);
-        }
-      });
-    }
-
-    // 3) 좌/우 분리 상태 (패널 위치 표시)
-    let s = el.dbgSplit.getContext('2d');
-    el.dbgSplit.width = raw.width;
-    el.dbgSplit.height = raw.height;
-    s.drawImage(raw, 0, 0);
-    if (panels && panels.length) {
-      s.strokeStyle = '#ff5252';
-      s.lineWidth = 3;
-      s.strokeRect(panels[0].x0, panels[0].y0, panels[0].x1 - panels[0].x0, panels[0].y1 - panels[0].y0);
-      if (panels[1]) {
-        s.strokeStyle = '#4d9eff';
-        s.strokeRect(panels[1].x0, panels[1].y0, panels[1].x1 - panels[1].x0, panels[1].y1 - panels[1].y0);
-      }
-      s.fillStyle = '#fff';
-      s.font = '14px sans-serif';
-      s.fillText('패널 ' + panels.length + '개', 8, 18);
-    } else {
-      s.fillStyle = '#ff5252';
-      s.font = '12px sans-serif';
-      s.fillText('패널 분리 실패', 8, 16);
-    }
-
-    // 4) OCR 입력 (패널 나란히)
-    const bctx = el.dbgBin.getContext('2d');
-    const imgs = [leftCanvas, rightCanvas].filter(Boolean);
-    const bw = imgs.reduce(function (a, c) { return a + c.width + 4; }, 0) || 1;
-    const bh = Math.max(1, imgs.reduce(function (a, c) { return Math.max(a, c.height); }, 1));
-    el.dbgBin.width = Math.max(1, bw);
-    el.dbgBin.height = bh;
-    bctx.fillStyle = '#111';
-    bctx.fillRect(0, 0, el.dbgBin.width, el.dbgBin.height);
-    let ox2 = 0;
-    imgs.forEach(function (c) {
-      bctx.drawImage(c, ox2, 0);
-      ox2 += c.width + 4;
-    });
-  } catch (e) { console.error('디버그 표시 오류:', e); }
-}
-
 // PP-OCRv5 인식 → 두 숫자 추출
 // 컬럼 프로젝션으로 두 숫자 영역 분리 → 각각 개별 인식
 async function recognizeRegion() {
@@ -2510,7 +2375,12 @@ async function recognizeRegion() {
     pv.height = raw.height;
     pv.getContext('2d').drawImage(raw, 0, 0);
   } catch (e) {}
-  el.captureStatus.textContent = '인식 중...';
+  // 이미 1~9999 리셋 상태(성공 완료)면 '인식 중...'으로 바꾸지 않고 상태 유지
+  // (600ms 루프마다 인식하며 상태를 덮어써 '인식 중'에 머무는 문제 방지)
+  const alreadyFull = state && state.min === TOTAL_MIN && state.max === TOTAL_MAX;
+  if (!alreadyFull) {
+    el.captureStatus.textContent = '인식 중...';
+  }
   try {
     const engine = window.__ocrEngine;
     if (!engine) {
@@ -2574,12 +2444,6 @@ async function recognizeRegion() {
         ];
       }
     }
-    if (captureDebug) {
-      drawDebugStages(raw, panels, null, null, null, null);
-      // 디버그 시 패널 좌표를 상태에 표시 (분리 상태 확인용)
-      const pinfo = panels.map(function (pp) { return '[' + pp.x0 + '~' + pp.x1 + ',' + pp.y0 + '~' + pp.y1 + ']'; });
-      el.captureStatus.textContent = '패널 ' + panels.length + '개: ' + pinfo.join(' ');
-    }
     // 좌→우 정렬
     panels.sort(function (a, b) { return a.x0 - b.x0; });
     // 좌/우 2개만 사용
@@ -2594,19 +2458,11 @@ async function recognizeRegion() {
       const panel = cropGrayPanel(raw, panels[pi]);
       if (!panel) { recogText['p' + pi] = '(크롭 실패)'; continue; }
       panelCanvases.push(panel);
-      if (captureDebug) {
-        drawDebugStages(raw, panels, panel, null, null, null);
-      }
       // 패널 하나당 숫자 하나 → 개별 OCR (원본 색상)
       const r = await recognizeOneNumber(engine, panel);
       recogText['p' + pi] = r.text;
       if (r.corrected) anyCorrected = true;
       if (r.num !== null) nums.push(r.num);
-    }
-
-    // 디버그: 각 패널 OCR 입력 표시
-    if (captureDebug && panelCanvases.length >= 1) {
-      drawDebugStages(raw, panels, panelCanvases[0], null, panelCanvases[0], panelCanvases[1] || null);
     }
 
     if (nums.length < 2) {
@@ -2648,8 +2504,13 @@ async function recognizeRegion() {
           if (captureFirstDone) {
             showAutoIndicator('reset', '1 ~ 9999');
           }
-          el.captureStatus.textContent = '✅ 1~9999 인식 - 기본 셋업 상태';
         }
+        // 1~9999 리셋 인식 → 자동 모드 UI 활성화 + 상태 명확히 표시
+        if (!captureFirstDone) {
+          captureFirstDone = true;
+          enterAutoMode();
+        }
+        el.captureStatus.textContent = '✅ 1~9999 인식 - 게임이 초기화되었습니다. 값을 바꾸면 자동 추적됩니다';
         captureLastMin = null;
         captureLastMax = null;
         captureBusy = false;
@@ -2753,16 +2614,6 @@ async function recognizeRegion() {
   }
   captureBusy = false;
 }
-
-// 브라우저 콘솔에서 디버깅용
-window.__captureDebug = function () {
-  return {
-    hasEngine: !!(window.__ocrEngine),
-    ocrReady: !!window.__ocrReady,
-    hasInit: typeof window.__initOcr === 'function',
-    engineMethods: window.__ocrEngine ? Object.keys(window.__ocrEngine) : []
-  };
-};
 
 // 드래그 영역 선택 - 좌표는 video 표시 영역 기준으로 통일
 function updateStageCache() {
@@ -3013,13 +2864,6 @@ el.btnCaptureHelpClose.addEventListener('click', function () {
 el.captureGuide.addEventListener('click', function () {
   if (!captureStream) startScreenCapture();
   else el.captureStatus.textContent = '이미 캡처 중입니다.';
-});
-// 디버그 토글: 전처리 단계별 뷰 표시/숨김
-el.btnCaptureDebug.addEventListener('click', function () {
-  captureDebug = !captureDebug;
-  el.captureDebugWrap.classList.toggle('hidden', !captureDebug);
-  el.btnCaptureDebug.textContent = captureDebug ? '🔍 디버그 ON' : '🔍 디버그';
-  if (captureDebug && captureRegion) recognizeRegion();
 });
 // 확인 버튼: 팝업 닫고 백그라운드 추적 시작 (캡처는 계속)
 el.btnCaptureConfirm.addEventListener('click', function () {
