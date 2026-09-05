@@ -1186,7 +1186,7 @@
       </div>
       <div class="capture-guide" id="captureGuide">
         <span class="cg-title">화면/창을 선택하세요</span>
-        <span class="cg-hint">이 안내를 클릭하거나, 드래그로 범위 숫자(회색 상자)를 지정하면 인식합니다. 영역 지정 후 빨간 기준선으로 좌/우 경계를 맞출 수 있습니다</span>
+        <span class="cg-hint">이 안내를 클릭하거나, 드래그로 범위 숫자(회색 상자)를 지정하면 인식합니다</span>
       </div>
     </div>
     <div class="capture-status" id="captureStatus">-</div>
@@ -2621,8 +2621,19 @@ async function recognizeRegion() {
     }
 
     if (nums.length >= 2) {
-      const min = Math.min(nums[0], nums[1]);
-      const max = Math.max(nums[0], nums[1]);
+      let min = Math.min(nums[0], nums[1]);
+      let max = Math.max(nums[0], nums[1]);
+
+      // 보완: 1~9999 리셋 상태에서 우측 9999를 놓친 경우
+      // 좌측이 1(초기 최솟값)이고, 우측이 9999가 아닌 1~2자리(9/99/999)로 나오면
+      // "9999"의 일부가 잘렸을 가능성이 높음 → 9999로 보정
+      // (게임이 1~9999 리셋 직후이거나, 이전에도 1~9999였다가 새로 리셋된 경우)
+      const wasFull = captureLastMin === TOTAL_MIN && captureLastMax === TOTAL_MAX;
+      const stateWasFull = state && state.min === TOTAL_MIN && state.max === TOTAL_MAX;
+      if (min === TOTAL_MIN && max !== TOTAL_MAX && max < 1000 && (wasFull || !state || stateWasFull)) {
+        el.captureStatus.textContent = '⚠️ 1~9999 감지: 우측 ' + max + ' → 9999로 보정';
+        max = TOTAL_MAX;
+      }
 
       el.crMin.value = min;
       el.crMax.value = max;
